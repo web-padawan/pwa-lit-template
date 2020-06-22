@@ -6,21 +6,48 @@
  */
 
 import { Router } from '@vaadin/router';
+import { until } from 'lit-html/directives/until';
 
 import { routes } from './routes';
 
-export const init = (outlet: HTMLElement) => {
-  const router = new Router(outlet);
+let routerInstance: Router;
 
-  router.setRoutes([
-    // Redirect to URL without trailing slash
-    {
-      path: '(.*)/',
-      action: (context, commands) => {
-        const newPath = context.pathname.slice(0, -1);
-        return commands.redirect(newPath);
-      }
-    },
-    ...routes
-  ]);
+export const initializeRouter = (outlet: HTMLElement) => {
+  if (!routerInstance && outlet) {
+    routerInstance = new Router(outlet);
+
+    routerInstance.setRoutes([
+      // Redirect to URL without trailing slash
+      {
+        path: '(.*)/',
+        action: (context, commands) => {
+          const newPath = context.pathname.slice(0, -1);
+          return commands.redirect(newPath);
+        }
+      },
+      ...routes
+    ]);
+  }
+
+  return routerInstance;
+};
+
+export const waitForRouter = (): Promise<Router> => {
+  return new Promise((resolve) => {
+    if (routerInstance) {
+      resolve(routerInstance);
+    } else {
+      setTimeout(() => waitForRouter(), 100);
+    }
+  });
+};
+
+export const urlForName = (name: string) => {
+  const url = waitForRouter().then((router) => {
+    console.log(router);
+
+    return router.urlForName(name);
+  });
+
+  return until(url, '');
 };
