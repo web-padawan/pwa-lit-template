@@ -57,6 +57,8 @@ export class AppIndex extends LitElement {
         <nav>
           <a href="/">Home</a>
           <span>-</span>
+          <a href="/users">Users</a>
+          <span>-</span>
           <a href="/about">About</a>
         </nav>
 
